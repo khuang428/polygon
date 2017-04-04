@@ -45,8 +45,8 @@ void draw_polygons( struct matrix *polygons, screen s, color c ) {
   int i;
   for(i = 0;i < polygons->lastcol-1;i += 3){
     draw_line(polygons->m[0][i],polygons->m[1][i],polygons->m[0][i+1],polygons->m[1][i+1],s,c);
-    draw_line(polygons->m[1][i],polygons->m[2][i],polygons->m[1][i+1],polygons->m[2][i+1],s,c);	        
-    draw_line(polygons->m[0][i],polygons->m[2][i],polygons->m[0][i+1],polygons->m[2][i+1],s,c);
+    draw_line(polygons->m[0][i+1],polygons->m[1][i+1],polygons->m[0][i+2],polygons->m[1][i+2],s,c);	        
+    draw_line(polygons->m[0][i+2],polygons->m[1][i+2],polygons->m[0][i],polygons->m[1][i],s,c);
   }
 }
 
@@ -76,18 +76,25 @@ void add_box( struct matrix * edges,
   y1 = y-height;
   z0 = z;
   z1 = z-depth;
-
   //front
-  add_edge(edges, x0, y0, z0, x0+2, y0+2, z0+2);
-  add_edge(edges, x1, y0, z0, x1+2, y0+2, z0+2);
-  add_edge(edges, x1, y1, z0, x1+2, y1+2, z0+2);
-  add_edge(edges, x0, y1, z0, x0+2, y1+2, z0+2);
-
+  add_polygon(edges,x0,y0,z0,x0,y1,z0,x1,y1,z0);
+  add_polygon(edges,x0,y0,z0,x1,y1,z0,x1,y0,z0);
   //back
-  add_edge(edges, x0, y0, z1, x0+2, y0+2, z1+2);
-  add_edge(edges, x1, y0, z1, x1+2, y0+2, z1+2);
-  add_edge(edges, x1, y1, z1, x1+2, y1+2, z1+2);
-  add_edge(edges, x0, y1, z1, x0+2, y1+2, z1+2);
+  add_polygon(edges,x1,y0,z1,x1,y1,z1,x0,y1,z1);
+  add_polygon(edges,x1,y0,z1,x0,y1,z1,x0,y0,z1);
+  //top
+  add_polygon(edges,x0,y0,z1,x0,y0,z0,x1,y0,z0);
+  add_polygon(edges,x0,y0,z1,x1,y0,z0,x1,y0,z1);
+  //bottom
+  add_polygon(edges,x0,y1,z0,x0,y1,z1,x1,y1,z1);
+  add_polygon(edges,x0,y1,z0,x1,y1,z1,x1,y1,z0);
+  //left
+  add_polygon(edges,x0,y0,z1,x0,y1,z1,x0,y1,z0);
+  add_polygon(edges,x0,y0,z1,x0,y1,z0,x0,y0,z0);
+  //right
+  add_polygon(edges,x1,y0,z0,x1,y1,z0,x1,y1,z1);
+  add_polygon(edges,x1,y0,z0,x1,y1,z1,x1,y0,z1); 
+  
 }
 
 /*======== void add_sphere() ==========
@@ -126,12 +133,12 @@ void add_sphere( struct matrix * edges,
       add_polygon(edges, points->m[0][index],
 		  points->m[1][index],
 		  points->m[2][index],
-		  points->m[0][index] + 1,
-		  points->m[1][index] + 1,
-		  points->m[2][index] + 1,
-		  points->m[0][index] + 2,
-		  points->m[1][index] + 2,
-		  points->m[2][index] + 2, 
+		  points->m[0][index+1],
+		  points->m[1][index+1],
+		  points->m[2][index+1],
+		  points->m[0][index+num_steps],
+		  points->m[1][index+num_steps],
+		  points->m[2][index+num_steps] 
 		  );
     }
   }  
@@ -226,8 +233,9 @@ void add_torus( struct matrix * edges,
 		  points->m[2][index] + 1,
 		  points->m[0][index] + 2,
 		  points->m[1][index] + 2,
-		  points->m[2][index] + 2, 
+		  points->m[2][index] + 2
 		  );
+    }
   }  
   free_matrix(points);
 }
